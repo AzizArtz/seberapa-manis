@@ -354,7 +354,7 @@
             osc.frequency.setValueAtTime(melody[noteIndex], now);
 
             // Volume dinaikin dari 0.03 jadi 0.09 biar kedengeran jelas tapi nggak bising
-            gain.gain.setValueAtTime(0.20, now);
+            gain.gain.setValueAtTime(0.10, now);
             gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
 
             osc.connect(gain);
@@ -452,9 +452,9 @@
 
     const TEASES = [
         "Ciee beneran mikir keras, sepeduli itu yaa?",
-        "Lama amat mikirnya, takut salah gombal ya?",
+        "Lama amat mikirnya, takut salah pilih ya?",
         "Nimbang-nimbang jawaban apa nimbang perasaan?",
-        "Duh, yang di-chat lagi senyum-senyum tuh."
+        "Duh, yang ngirim lagi senyum-senyum tuh."
     ];
 
     function maxScore() {
@@ -552,7 +552,7 @@
         $("verdict").textContent = v.title;
         $("verdictText").textContent = v.text;
         
-        const shareText = `Hasil tes ke-gemes-an aku: *${pct}%* (${v.title})\n\n"${v.text}"\n\nCoba mainin juga deh!`;
+        const shareText = `Hasil tes seberapa manis aku: *${pct}%* (${v.title})\n\n"${v.text}"\n\nCoba mainin juga deh!`;
         $("waBtn").href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(shareText);
 
         setTimeout(() => { $("meterBar").style.width = pct + "%"; }, 100);
