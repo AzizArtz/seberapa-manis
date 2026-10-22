@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tes: Seberapa Manis Kehadiranmu?</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --pink: #FF6B9D;
+            --yellow: #FFE600;
+            --blue: #4D9FFF;
+            --mint: #7BFFB2;
+            --orange: #FF9F1C;
+            --paper: #FFF7E8;
+            --black: #111;
+            --white: #FFF;
+            --border: 4px solid var(--black);
+            --shadow: 6px 6px 0 var(--black);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            color: var(--black);
+            background-color: var(--yellow);
+            background-image: repeating-linear-gradient(-45deg, rgba(0,0,0,0.08) 0 10px, transparent 10px 20px);
+            min-height: 100vh;
+            padding: 22px 14px 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .music-toggle {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            background: var(--white);
+            border: 3px solid var(--black);
+            box-shadow: 3px 3px 0 var(--black);
+            font-family: inherit;
+            font-weight: 900;
+            font-size: 0.85rem;
+            padding: 8px 12px;
+            cursor: pointer;
+            z-index: 100;
+            transition: transform 0.08s, box-shadow 0.08s;
+        }
+        .music-toggle:hover { transform: translate(-2px, -2px); box-shadow: 5px 5px 0 var(--black); }
+        .music-toggle:active { transform: translate(2px, 2px); box-shadow: 0 0 0 var(--black); }
+
+        .wrap { width: 100%; max-width: 480px; display: flex; flex-direction: column; gap: 20px; z-index: 10; margin-top: 20px; }
+
+        header {
+            background: var(--white);
+            border: var(--border);
+            box-shadow: var(--shadow);
+            padding: 14px 18px;
+            transform: rotate(-1deg);
+        }
+        header h1 { font-size: clamp(1.8rem, 7.5vw, 2.5rem); font-weight: 900; text-transform: uppercase; line-height: 1; }
+        header p { font-weight: 700; margin-top: 6px; font-size: 0.95rem; }
+
+        .card {
+            background: var(--white);
+            border: var(--border);
+            box-shadow: var(--shadow);
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            transition: transform 0.1s ease;
+            position: relative;
+        }
+
+        .card.shake {
+            animation: shake 0.3s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-6px) rotate(-1deg); }
+            40% { transform: translateX(6px) rotate(1deg); }
+            60% { transform: translateX(-4px); }
+            80% { transform: translateX(4px); }
+        }
+
+        .progress {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 6px;
+        }
+        .dot {
+            height: 12px;
+            border: 3px solid var(--black);
+            background: var(--paper);
+            transition: background 0.3s ease;
+        }
+        .dot.done { background: var(--mint); }
+        .dot.now { background: var(--pink); }
+
+        .q-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .q-num {
+            font-size: 0.75rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            background: var(--black);
+            color: var(--white);
+            padding: 4px 9px;
+        }
+
+        .think-tease {
+            font-size: 0.8rem;
+            font-weight: 900;
+            color: var(--pink);
+            background: var(--black);
+            padding: 3px 8px;
+            border: 2px solid var(--black);
+            display: none;
+            animation: bounce 0.4s infinite alternate;
+        }
+        .think-tease.show { display: inline-block; }
+
+        @keyframes bounce {
+            from { transform: translateY(0); }
+            to { transform: translateY(-3px); }
+        }
+
+        .q-text { font-size: 1.25rem; font-weight: 900; line-height: 1.3; }
+
+        .opts { display: flex; flex-direction: column; gap: 10px; }
+        .opt {
+            font-family: inherit;
+            font-weight: 900;
+            font-size: 0.98rem;
+            text-align: left;
+            background: var(--white);
+            border: 3px solid var(--black);
+            box-shadow: 4px 4px 0 var(--black);
+            padding: 12px 14px;
+            cursor: pointer;
+            transition: transform 0.08s, box-shadow 0.08s, background 0.1s;
+        }
+        .opt:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--black); background: var(--yellow); }
+        .opt:active { transform: translate(3px, 3px); box-shadow: 0 0 0 var(--black); }
+
+        /* Result */
+        .result { display: none; flex-direction: column; gap: 14px; }
+        .result.show { display: flex; animation: pop 0.35s ease; }
+        @keyframes pop {
+            0% { transform: scale(0.92); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .score-big {
+            font-size: 4.2rem;
+            font-weight: 900;
+            line-height: 1;
+            background: var(--pink);
+            border: var(--border);
+            padding: 10px;
+            text-align: center;
+            color: var(--white);
+            transform: rotate(-2deg);
+        }
+        .verdict { font-size: 1.4rem; font-weight: 900; text-transform: uppercase; line-height: 1.15; }
+        .verdict-text {
+            background: var(--paper);
+            border: 3px solid var(--black);
+            padding: 14px;
+            font-weight: 700;
+            line-height: 1.45;
+        }
+        .meter {
+            height: 26px;
+            border: 3px solid var(--black);
+            background: var(--white);
+            overflow: hidden;
+        }
+        .meter span {
+            display: block;
+            height: 100%;
+            width: 0%;
+            background: var(--blue);
+            border-right: 3px solid var(--black);
+            transition: width 0.8s ease;
+        }
+
+        .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .btn {
+            font-family: inherit;
+            font-weight: 900;
+            font-size: 0.92rem;
+            text-transform: uppercase;
+            background: var(--white);
+            color: var(--black);
+            border: var(--border);
+            box-shadow: 4px 4px 0 var(--black);
+            padding: 12px 10px;
+            cursor: pointer;
+            transition: transform 0.08s, box-shadow 0.08s;
+            text-align: center;
+            text-decoration: none;
+        }
+        .btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--black); }
+        .btn:active { transform: translate(4px, 4px); box-shadow: 0 0 0 var(--black); }
+        .btn-mint { background: var(--mint); }
+        .btn-blue { background: var(--blue); }
+        .btn-orange { background: var(--orange); grid-column: 1 / -1; }
+
+        footer {
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+            background: var(--white);
+            border: 3px solid var(--black);
+            padding: 8px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 24px; left: 50%;
+            transform: translateX(-50%) translateY(120px);
+            background: var(--black);
+            color: var(--white);
+            font-weight: 900;
+            padding: 12px 18px;
+            box-shadow: 4px 4px 0 var(--pink);
+            transition: transform 0.25s;
+            z-index: 60;
+        }
+        .toast.show { transform: translateX(-50%) translateY(0); }
+
+        .confetti-particle {
+            position: fixed;
+            top: -20px;
+            font-size: 24px;
+            user-select: none;
+            pointer-events: none;
+            z-index: 100;
+            animation: fall linear forwards;
+        }
+        @keyframes fall {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(105vh) rotate(360deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<button class="music-toggle" id="musicToggle">🎵 BGM: OFF</button>
+
+<div class="wrap">
+    <header>
+        <h1>Seberapa Manis Kehadiranmu?</h1>
+        <p>Katanya kamu cuma manusia biasa. Tapi kok, sejak ada kamu, hal-hal sederhana jadi punya arti yang berbeda?</p>
+    </header>
+
+    <section class="card" id="quiz">
+        <div class="progress" id="progress"></div>
+        <div class="q-header-row">
+            <span class="q-num" id="qNum">Pertanyaan 1 / 5</span>
+            <span class="think-tease" id="thinkTease"></span>
+        </div>
+        <div class="q-text" id="qText"></div>
+        <div class="opts" id="opts"></div>
+    </section>
+
+    <section class="card result" id="result">
+        <div class="score-big" id="scoreBig">0%</div>
+        <div class="meter"><span id="meterBar"></span></div>
+        <div class="verdict" id="verdict"></div>
+        <div class="verdict-text" id="verdictText"></div>
+        <div class="btns">
+            <button class="btn btn-mint" id="copyBtn">Salin Hasil</button>
+            <a class="btn btn-blue" id="waBtn" href="#" target="_blank">Kirim ke WA</a>
+            <button class="btn btn-orange" id="againBtn">Ulang Tes</button>
+        </div>
+    </section>
+
+    <footer>Dibuat dengan sengaja, untuk seseorang yang mungkin belum sadar betapa berharganya dirinya.</footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    let isBgmPlaying = false;
+    let bgmInterval = null;
+    let hasInteracted = false;
+
+    function playSound(type) {
+        if (!audioCtx) return;
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        const now = audioCtx.currentTime;
+        if (type === 'click') {
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(440, now);
+            osc.frequency.exponentialRampToValueAtTime(880, now + 0.08);
+            gain.gain.setValueAtTime(0.25, now); // Volume agak dibesarkan dikit
+            gain.gain.linearRampToValueAtTime(0.01, now + 0.08);
+            osc.start(now);
+            osc.stop(now + 0.08);
+        } else if (type === 'finish') {
+            [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+                const o = audioCtx.createOscillator();
+                const g = audioCtx.createGain();
+                o.connect(g);
+                g.connect(audioCtx.destination);
+                o.frequency.setValueAtTime(freq, now + i * 0.08);
+                g.gain.setValueAtTime(0.2, now + i * 0.08);
+                g.gain.linearRampToValueAtTime(0.01, now + i * 0.08 + 0.15);
+                o.start(now + i * 0.08);
+                o.stop(now + i * 0.08 + 0.15);
+            });
+        }
+    }
+
+    function startBgm() {
+        if (isBgmPlaying) return;
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        isBgmPlaying = true;
+        document.getElementById('musicToggle').textContent = "🎵 BGM: ON";
+
+        const melody = [
+            523.25, 587.33, 659.25, 783.99, 
+            659.25, 587.33, 523.25, 392.00,
+            440.00, 523.25, 587.33, 659.25,
+            587.33, 523.25, 440.00, 392.00
+        ];
+        let noteIndex = 0;
+
+        bgmInterval = setInterval(() => {
+            if (!isBgmPlaying) return;
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(melody[noteIndex], now);
+
+            // Volume dinaikin dari 0.03 jadi 0.09 biar kedengeran jelas tapi nggak bising
+            gain.gain.setValueAtTime(0.20, now);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc.start(now);
+            osc.stop(now + 0.25);
+
+            noteIndex = (noteIndex + 1) % melody.length;
+        }, 300);
+    }
+
+    function stopBgm() {
+        isBgmPlaying = false;
+        clearInterval(bgmInterval);
+        document.getElementById('musicToggle').textContent = "🎵 BGM: OFF";
+    }
+
+    document.getElementById('musicToggle').addEventListener('click', () => {
+        if (isBgmPlaying) {
+            stopBgm();
+        } else {
+            startBgm();
+        }
+    });
+
+    // Auto-trigger BGM pas user pertama kali klik layar/opsi apa aja (mengakali kebijakan browser)
+    function handleFirstInteraction() {
+        if (!hasInteracted) {
+            hasInteracted = true;
+            startBgm();
+        }
+    }
+
+    const QUESTIONS = [
+        {
+            q: "Menurut kamu, apa yang bikin seseorang jadi istimewa?",
+            opts: [
+                { t: "Cara dia menjadi dirinya sendiri.", s: 3 },
+                { t: "Senyumnya yang bikin nyaman.", s: 3 },
+                { t: "Entahlah, kayaknya kamu punya semuanya.", s: 4 },
+                { t: "Karena dia bayar tagihan tepat waktu. (Gak nyambung ya?)", s: 1 }
+            ]
+        },
+        {
+            q: "Kalau ada yang tiba-tiba senyum sendiri pas ingat kamu, menurutmu kenapa?",
+            opts: [
+                { t: "Mungkin lagi ingat sesuatu yang lucu", s: 1 },
+                { t: "Mungkin lagi kangen seseorang", s: 2 },
+                { t: "Mungkin karena kamu terlalu gampang bikin orang jatuh hati.", s: 4 },
+                { t: "Lagi kerasukan jin koneng, yakali.", s: 1 }
+            ]
+        },
+        {
+            q: "Hal kecil apa yang paling bisa bikin hari seseorang jadi lebih baik?",
+            opts: [
+                { t: "Sekadar tahu kalau kamu baik-baik saja.", s: 2 },
+                { t: "Mendapat pesan dari orang tersayang.", s: 4 },
+                { t: "Mendengar lagu favorit.", s: 1 },
+                { t: "Dapat transferan misterius 10 juta.", s: 1 }
+            ]
+        },
+        {
+            q: "Kalau seseorang mengingat hal-hal kecil tentang kamu, artinya apa?",
+            opts: [
+                { t: "Dia benar-benar mendengarkan saat kamu bercerita.", s: 3 },
+                { t: "Mungkin karena baginya, nggak ada hal tentang kamu yang terasa sepele.", s: 4 },
+                { t: "Dia memang orang yang perhatian.", s: 2 },
+                { t: "Dia stalker profesional, waspadalah.", s: 1 }
+            ]
+        },
+        {
+            q: "Menurut kamu, bagaimana rasanya menjadi alasan seseorang tersenyum setiap hari?",
+            opts: [
+                { t: "Sedikit bikin malu.", s: 3 },
+                { t: "Semoga orang itu tahu betapa berharganya dia.", s: 4 },
+                { t: "Pasti menyenangkan.", s: 2 },
+                { t: "Berat, biar aku aja yang nanggung.", s: 4 }
+            ]
+        }
+    ];
+
+    const VERDICTS = [
+        { min: 17, title: "FIX, KAMU KESAYANGAN AKU 💋", text: "Udah nggak bisa ngeles lagi kayaknya. Aku emang sesuka itu sama kamu. kamu mau ngapain aja tetap aja aku seneng, heran aku sama diri sendiri." },
+        { min: 13, title: "KAMU BIKIN KANGEN TERUS 🫵🏻", text: "Baru juga selesai ngobrol, kok udah pengin ngobrol lagi? Kamu punya ilmu apa sih, kok aku jadi begini?" },
+        { min: 9,  title: "KAMU TUH BEDA 💘", text: "Aku juga bingung jelasinnya gimana, pokoknya kalau sama kamu tuh rasanya beda aja. Padahal kamu nggak ngapa-ngapain, tapi aku udah seneng duluan." },
+        { min: 5,  title: "KAMU BIKIN BETAH 😚", text: "Awalnya ngobrol biasa, eh malah keterusan. Sekarang kalau belum ngobrol sama kamu, rasanya ada aja yang kurang." }
+    ];
+
+    const $ = id => document.getElementById(id);
+    let idx = 0;
+    let total = 0;
+    let questionTimer = null;
+    let secondsSpent = 0;
+
+    const TEASES = [
+        "Ciee beneran mikir keras, sepeduli itu yaa?",
+        "Lama amat mikirnya, takut salah gombal ya?",
+        "Nimbang-nimbang jawaban apa nimbang perasaan?",
+        "Duh, yang di-chat lagi senyum-senyum tuh."
+    ];
+
+    function maxScore() {
+        return QUESTIONS.reduce((a, q) => a + Math.max(...q.opts.map(o => o.s)), 0);
+    }
+
+    function renderProgress() {
+        const wrap = $("progress");
+        wrap.innerHTML = "";
+        QUESTIONS.forEach((_, i) => {
+            const d = document.createElement("div");
+            d.className = "dot" + (i < idx ? " done" : i === idx ? " now" : "");
+            wrap.appendChild(d);
+        });
+    }
+
+    function startTimer() {
+        clearInterval(questionTimer);
+        secondsSpent = 0;
+        $("thinkTease").classList.remove("show");
+        
+        questionTimer = setInterval(() => {
+            secondsSpent++;
+            if (secondsSpent === 6) {
+                const randomTease = TEASES[Math.floor(Math.random() * TEASES.length)];
+                $("thinkTease").textContent = randomTease;
+                $("thinkTease").classList.add("show");
+            }
+        }, 1000);
+    }
+
+    function renderQuestion() {
+        const q = QUESTIONS[idx];
+        $("qNum").textContent = `Pertanyaan ${idx + 1} / ${QUESTIONS.length}`;
+        $("qText").textContent = q.q;
+        renderProgress();
+        
+        const opts = $("opts");
+        opts.innerHTML = "";
+        q.opts.forEach(o => {
+            const b = document.createElement("button");
+            b.className = "opt";
+            b.textContent = o.t;
+            b.addEventListener("click", () => {
+                handleFirstInteraction();
+                answer(o.s);
+            });
+            opts.appendChild(b);
+        });
+
+        startTimer();
+    }
+
+    function triggerShake() {
+        const card = $("quiz");
+        card.classList.add("shake");
+        setTimeout(() => card.classList.remove("shake"), 300);
+    }
+
+    function spawnConfetti() {
+        const emojis = ['💖', '✨', '🌸', '💫', '💋', '💘'];
+        for (let i = 0; i < 25; i++) {
+            const span = document.createElement('span');
+            span.className = 'confetti-particle';
+            span.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+            span.style.left = Math.random() * 100 + 'vw';
+            span.style.animationDuration = (Math.random() * 1.5 + 1.5) + 's';
+            span.style.animationDelay = (Math.random() * 0.5) + 's';
+            document.body.appendChild(span);
+            setTimeout(() => span.remove(), 3000);
+        }
+    }
+
+    function answer(s) {
+        clearInterval(questionTimer);
+        playSound('click');
+        triggerShake();
+        total += s;
+        idx++;
+        if (idx < QUESTIONS.length) renderQuestion();
+        else finish();
+    }
+
+    function finish() {
+        clearInterval(questionTimer);
+        playSound('finish');
+        spawnConfetti();
+        const max = maxScore();
+        const pct = Math.round((total / max) * 100);
+        const v = VERDICTS.find(x => pct >= x.min * 100 / max) || VERDICTS[VERDICTS.length - 1];
+
+        $("quiz").style.display = "none";
+        $("result").classList.add("show");
+        $("scoreBig").textContent = pct + "%";
+        $("verdict").textContent = v.title;
+        $("verdictText").textContent = v.text;
+        
+        const shareText = `Hasil tes ke-gemes-an aku: *${pct}%* (${v.title})\n\n"${v.text}"\n\nCoba mainin juga deh!`;
+        $("waBtn").href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(shareText);
+
+        setTimeout(() => { $("meterBar").style.width = pct + "%"; }, 100);
+        $("result").scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    function resultText() {
+        const max = maxScore();
+        const pct = Math.round((total / max) * 100);
+        const v = VERDICTS.find(x => pct >= x.min * 100 / max) || VERDICTS[VERDICTS.length - 1];
+        return `Hasil tes: ${pct}% gemes. ${v.title}\n${v.text}`;
+    }
+
+    function showToast(msg) {
+        const t = $("toast");
+        t.textContent = msg;
+        t.classList.add("show");
+        clearTimeout(showToast._t);
+        showToast._t = setTimeout(() => t.classList.remove("show"), 1800);
+    }
+
+    async function copyText(text) {
+        try {
+            await navigator.clipboard.writeText(text);
+        } catch (e) {
+            const ta = document.createElement("textarea");
+            ta.value = text;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand("copy");
+            ta.remove();
+        }
+    }
+
+    $("copyBtn").addEventListener("click", async () => {
+        handleFirstInteraction();
+        playSound('click');
+        await copyText(resultText());
+        showToast("Hasil tersalin!");
+    });
+
+    $("againBtn").addEventListener("click", () => {
+        handleFirstInteraction();
+        playSound('click');
+        idx = 0;
+        total = 0;
+        $("result").classList.remove("show");
+        $("meterBar").style.width = "0%";
+        $("quiz").style.display = "flex";
+        renderQuestion();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    // Deteksi klik pertama di mana aja di halaman buat langsung hidupin musik
+    document.body.addEventListener('click', () => {
+        handleFirstInteraction();
+    }, { once: true });
+
+    renderQuestion();
+</script>
+</body>
+</html>
